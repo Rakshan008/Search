@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)">
+  <title>Search - Direct Answers, Not Just Links</title>
+  <meta name="description" content="A new kind of search engine that gives you direct, accurate answers instead of just links. Powered by AI.">
+  <style>
+    :root {
+      --primary: #6e56cf;
+      --primary-glow: #9073f1;
+      --accent: #00ccb4;
+      --bg-dark: #0d1117;
+      --bg-light: #ffffff;
+      --text-dark: #e6edf3;
+      --text-light: #0d1117;
+      --shadow: rgba(0, 0, 0, 0.1);
+      --card-shadow: rgba(110, 86, 207, 0.15);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-dark);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body.light-mode {
+      background-color: var(--bg-light);
+      color: var(--text-light);
+    }
+
+    .grid-background {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(rgba(110, 86, 207, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(110, 86, 207, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .light-mode .grid-background {
+      background-image: 
+        linear-gradient(rgba(110, 86, 207, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(110, 86, 207, 0.05) 1px, transparent 1px);
+    }
+
+    .glow-circle {
+      position: absolute;
+      width: 50vw;
+      height: 50vw;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(110, 86, 207, 0.15) 0%, rgba(110, 86, 207, 0) 70%);
+      z-index: -1;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      filter: blur(30px);
+    }
+
+    .container {
+      width: 100%;
+      max-width: 700px;
+      padding: 0 20px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+    }
+
+    .logo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .logo-text {
+      font-size: 80px;
+      font-weight: 700;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-glow));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+      text-align: center;
+      line-height: 1;
+      position: relative;
+      animation: float 4s ease-in-out infinite;
+    }
+
+    .light-mode .logo-text {
+      background: linear-gradient(135deg, var(--primary), #4b2cc2);
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+
+    .search-container {
+      width: 100%;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      height: 60px;
+      border-radius: 16px;
+      background-color: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(110, 86, 207, 0.3);
+      padding: 0 60px 0 24px;
+      font-size: 18px;
+      color: var(--text-dark);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 8px 24px var(--shadow);
+    }
+
+    .light-mode .search-input {
+      background-color: rgba(255, 255, 255, 0.8);
+      color: var(--text-light);
+      border: 1px solid rgba(110, 86, 207, 0.2);
+      box-shadow: 0 8px 24px rgba(110, 86, 207, 0.1);
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(110, 86, 207, 0.2);
+    }
+
+    .search-button {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-glow));
+      border: none;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .search-button:hover {
+      transform: translateY(-50%) scale(1.05);
+      box-shadow: 0 0 12px rgba(110, 86, 207, 0.5);
+    }
+
+    .search-button:active {
+      transform: translateY(-50%) scale(0.95);
+    }
+
+    .tagline {
+      font-size: 16px;
+      opacity: 0.7;
+      text-align: center;
+      max-width: 500px;
+      line-height: 1.5;
+    }
+
+    .search-result {
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 12px;
+      background-color: rgba(110, 86, 207, 0.1);
+      width: 100%;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .light-mode .search-result {
+      background-color: rgba(110, 86, 207, 0.05);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .notification {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 24px;
+      background: rgba(0, 204, 180, 0.2);
+      border: 1px solid var(--accent);
+      backdrop-filter: blur(8px);
+      border-radius: 12px;
+      color: var(--accent);
+      font-weight: 500;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s, visibility 0.3s;
+    }
+
+    .light-mode .notification {
+      background: rgba(0, 204, 180, 0.1);
+    }
+
+    .notification.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .footer {
+      margin-top: 80px;
+      opacity: 0.5;
+      font-size: 14px;
+    }
+
+    .theme-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(110, 86, 207, 0.1);
+      border: 1px solid rgba(110, 86, 207, 0.2);
+      color: var(--text-dark);
+      border-radius: 12px;
+      padding: 8px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .light-mode .theme-toggle {
+      color: var(--text-light);
+      background: rgba(110, 86, 207, 0.05);
+    }
+
+    .theme-toggle:hover {
+      background: rgba(110, 86, 207, 0.2);
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        gap: 30px;
+      }
+      
+      .logo-text {
+        font-size: 60px;
+      }
+      
+      .search-input {
+        height: 56px;
+        font-size: 16px;
+      }
+
+      .theme-toggle {
+        top: 16px;
+        right: 16px;
+        padding: 6px 12px;
+        font-size: 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .logo-text {
+        font-size: 48px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <button class="theme-toggle" id="theme-toggle">
+    <svg id="moon-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block;">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+    </svg>
+    <svg id="sun-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+    <span id="theme-text">Light Mode</span>
+  </button>
+
+  <div class="grid-background"></div>
+  <div class="glow-circle"></div>
+
+  <div class="container">
+    <div class="logo">
+      <div class="logo-text">SEARCH</div>
+    </div>
+
+    <div class="search-container">
+      <input type="text" class="search-input" placeholder="Ask me anything..." aria-label="Search query">
+      <button class="search-button" aria-label="Search">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </button>
+      <div class="search-result" id="result"></div>
+    </div>
+
+    <p class="tagline">A new kind of search engine that gives you direct, accurate answers instead of just links. Powered by AI.</p>
+  </div>
+
+  <div class="notification" id="notification">Search query submitted!</div>
+  
+  <footer class="footer">© 2025 Search. All rights reserved.</footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const searchInput = document.querySelector('.search-input');
+      const searchButton = document.querySelector('.search-button');
+      const resultDiv = document.getElementById('result');
+      const notification = document.getElementById('notification');
+      const themeToggle = document.getElementById('theme-toggle');
+      const moonIcon = document.getElementById('moon-icon');
+      const sunIcon = document.getElementById('sun-icon');
+      const themeText = document.getElementById('theme-text');
+      
+      // Check for saved theme preference
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'light') {
+        document.body.classList.add('light-mode');
+        moonIcon.style.display = 'none';
+        sunIcon.style.display = 'inline-block';
+        themeText.textContent = 'Dark Mode';
+      }
+
+      // Theme toggle functionality
+      themeToggle.addEventListener('click', () => {
+        if (document.body.classList.contains('light-mode')) {
+          // Switch to dark mode
+          document.body.classList.remove('light-mode');
+          localStorage.setItem('theme', 'dark');
+          moonIcon.style.display = 'inline-block';
+          sunIcon.style.display = 'none';
+          themeText.textContent = 'Light Mode';
+        } else {
+          // Switch to light mode
+          document.body.classList.add('light-mode');
+          localStorage.setItem('theme', 'light');
+          moonIcon.style.display = 'none';
+          sunIcon.style.display = 'inline-block';
+          themeText.textContent = 'Dark Mode';
+        }
+      });
+
+      // Function to handle search
+      const handleSearch = () => {
+        const query = searchInput.value.trim();
+        
+        if (query) {
+          console.log('Search query:', query);
+          
+          // Show notification
+          notification.classList.add('show');
+          setTimeout(() => {
+            notification.classList.remove('show');
+          }, 3000);
+          
+          // Display the query in the result div
+          resultDiv.textContent = `Searching for: "${query}"`;
+          resultDiv.style.display = 'block';
+          
+          // In a real application, you would send this query to your backend
+        }
+      };
+
+      // Event listeners for search
+      searchButton.addEventListener('click', handleSearch);
+      
+      searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          handleSearch();
+        }
+      });
+
+      // Dynamic grid pattern based on mouse movement
+      document.addEventListener('mousemove', (e) => {
+        const mouseX = e.clientX / window.innerWidth;
+        const mouseY = e.clientY / window.innerHeight;
+        
+        const glowCircle = document.querySelector('.glow-circle');
+        glowCircle.style.transform = `translate(calc(-50% + ${mouseX * 20}px), calc(-50% + ${mouseY * 20}px))`;
+      });
+    });
+  </script>
+</body>
+</html>
