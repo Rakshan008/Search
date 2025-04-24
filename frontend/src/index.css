@@ -1,0 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
+  }
+  body {
+    @apply font-sans antialiased bg-background-light dark:bg-background-dark text-text-primary-light dark:text-text-primary-dark transition-colors duration-300;
+  }
+  /* Add custom scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: rgba(156, 163, 175, 0.5); /* gray-400 with opacity */
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(107, 114, 128, 0.7); /* gray-500 with opacity */
+  }
+  .dark ::-webkit-scrollbar-thumb {
+     background-color: rgba(75, 85, 99, 0.6); /* gray-600 with opacity */
+  }
+   .dark ::-webkit-scrollbar-thumb:hover {
+     background-color: rgba(55, 65, 81, 0.8); /* gray-700 with opacity */
+  }
+}
+
+/* Add any global component styles if needed */
+.search-input-shadow {
+    @apply shadow-input hover:shadow-input-focus focus-within:shadow-input-focus;
+}
+.dark .search-input-shadow {
+     @apply shadow-none border border-border-dark focus-within:border-brand-blue-dark;
+}
+
