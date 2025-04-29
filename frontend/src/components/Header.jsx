@@ -1,39 +1,28 @@
 import React from 'react';
-import ImageSection from './ImageSection';
-import SourceLinks from './SourceLinks';
+import { Sun, Moon, Search } from 'lucide-react'; // Assuming lucide-react is installed
 
-const AnswerCard = ({ result }) => {
-  // If no result data, don't render anything
-  if (!result) {
-    return null;
-  }
-
-  const { answer, sources, imageUrl } = result;
-
+const Header = ({ theme, onThemeToggle }) => {
   return (
-    <div className="w-full max-w-2xl lg:max-w-3xl p-5 sm:p-6 md:p-8 bg-surface-light dark:bg-surface-dark rounded-xl shadow-card dark:shadow-card-dark border border-border-light dark:border-border-dark">
-      {/* Optional Image */}
-      <ImageSection imageUrl={imageUrl} altText={`Visual related to the answer`} />
+    <header className="py-3 px-4 sm:px-6 md:px-10 flex justify-between items-center sticky top-0 z-10 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-border-light dark:border-border-dark">
+      {/* Logo/Brand Name */}
+      <div className="flex items-center space-x-2">
+         <Search size={24} className="text-brand-blue dark:text-brand-blue-light" />
+         <h1 className="text-xl sm:text-2xl font-bold text-text-primary-light dark:text-text-primary-dark">
+           Search
+         </h1>
+      </div>
 
-      {/* Direct Answer Text */}
-      {answer && (
-        <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none text-text-primary-light dark:text-text-primary-dark leading-relaxed">
-          {/* Using dangerouslySetInnerHTML can be risky if 'answer' contains malicious script.
-              In a real app, sanitize this HTML string on the backend or use a markdown parser
-              on the frontend if the LLM returns markdown. For simplicity here, we assume
-              the simulated backend provides safe, simple HTML or plain text.
-              If 'answer' is plain text, just render it in a <p> tag.
-              Example for plain text: <p>{answer}</p>
-           */}
-           {/* Let's assume the answer is plain text for safety */}
-           <p>{answer}</p>
-        </div>
-      )}
 
-      {/* Source Links */}
-      <SourceLinks sources={sources} />
-    </div>
+      {/* Theme Toggle Button */}
+      <button
+        onClick={onThemeToggle}
+        className="p-2 rounded-full text-text-secondary-light dark:text-text-secondary-dark hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-brand-blue focus:ring-offset-2 dark:focus:ring-offset-background-dark"
+        aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+      >
+        {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+      </button>
+    </header>
   );
 };
 
-export default AnswerCard;
+export default Header;
