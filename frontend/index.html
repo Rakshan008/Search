@@ -343,83 +343,156 @@
   <footer class="footer">© 2025 Search. All rights reserved.</footer>
 
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const searchInput = document.querySelector('.search-input');
-      const searchButton = document.querySelector('.search-button');
-      const resultDiv = document.getElementById('result');
-      const notification = document.getElementById('notification');
-      const themeToggle = document.getElementById('theme-toggle');
-      const moonIcon = document.getElementById('moon-icon');
-      const sunIcon = document.getElementById('sun-icon');
-      const themeText = document.getElementById('theme-text');
-      
-      // Check for saved theme preference
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme === 'light') {
-        document.body.classList.add('light-mode');
-        moonIcon.style.display = 'none';
-        sunIcon.style.display = 'inline-block';
-        themeText.textContent = 'Dark Mode';
-      }
-
-      // Theme toggle functionality
-      themeToggle.addEventListener('click', () => {
-        if (document.body.classList.contains('light-mode')) {
-          // Switch to dark mode
-          document.body.classList.remove('light-mode');
-          localStorage.setItem('theme', 'dark');
-          moonIcon.style.display = 'inline-block';
-          sunIcon.style.display = 'none';
-          themeText.textContent = 'Light Mode';
-        } else {
-          // Switch to light mode
-          document.body.classList.add('light-mode');
-          localStorage.setItem('theme', 'light');
-          moonIcon.style.display = 'none';
-          sunIcon.style.display = 'inline-block';
-          themeText.textContent = 'Dark Mode';
-        }
-      });
-
-      // Function to handle search
-      const handleSearch = () => {
-        const query = searchInput.value.trim();
-        
-        if (query) {
-          console.log('Search query:', query);
-          
-          // Show notification
-          notification.classList.add('show');
-          setTimeout(() => {
-            notification.classList.remove('show');
-          }, 3000);
-          
-          // Display the query in the result div
-          resultDiv.textContent = `Searching for: "${query}"`;
-          resultDiv.style.display = 'block';
-          
-          // In a real application, you would send this query to your backend
-        }
-      };
-
-      // Event listeners for search
-      searchButton.addEventListener('click', handleSearch);
-      
-      searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-          handleSearch();
-        }
-      });
-
-      // Dynamic grid pattern based on mouse movement
-      document.addEventListener('mousemove', (e) => {
-        const mouseX = e.clientX / window.innerWidth;
-        const mouseY = e.clientY / window.innerHeight;
-        
-        const glowCircle = document.querySelector('.glow-circle');
-        glowCircle.style.transform = `translate(calc(-50% + ${mouseX * 20}px), calc(-50% + ${mouseY * 20}px))`;
-      });
-    });
-  </script>
+        document.addEventListener('DOMContentLoaded', () => {
+          const searchInput = document.querySelector('.search-input');
+          const searchButton = document.querySelector('.search-button');
+          const resultDiv = document.getElementById('result'); // Correctly selects the div with id="result"
+          const notification = document.getElementById('notification');
+          const themeToggle = document.getElementById('theme-toggle');
+          const moonIcon = document.getElementById('moon-icon');
+          const sunIcon = document.getElementById('sun-icon');
+          const themeText = document.getElementById('theme-text');
+         
+          // Check for saved theme preference
+          const savedTheme = localStorage.getItem('theme');
+          if (savedTheme === 'light') {
+            document.body.classList.add('light-mode');
+            moonIcon.style.display = 'none';
+            sunIcon.style.display = 'inline-block';
+            themeText.textContent = 'Dark Mode';
+          }
+    
+          // Theme toggle functionality
+          themeToggle.addEventListener('click', () => {
+            if (document.body.classList.contains('light-mode')) {
+              // Switch to dark mode
+              document.body.classList.remove('light-mode');
+              localStorage.setItem('theme', 'dark');
+              moonIcon.style.display = 'inline-block';
+              sunIcon.style.display = 'none';
+              themeText.textContent = 'Light Mode';
+            } else {
+              // Switch to light mode
+              document.body.classList.add('light-mode');
+              localStorage.setItem('theme', 'light');
+              moonIcon.style.display = 'none';
+              sunIcon.style.display = 'inline-block';
+              themeText.textContent = 'Dark Mode';
+            }
+          });
+    
+          // Function to handle search - MODIFIED
+          const handleSearch = async () => { // Added 'async' here because we will use 'await' with fetch
+            const query = searchInput.value.trim();
+    
+            if (query) {
+              console.log('Search query:', query);
+    
+              // Show notification (optional, based on your UI preference)
+              // notification.classList.add('show');
+              // setTimeout(() => {
+              //   notification.classList.remove('show');
+              // }, 3000);
+    
+              // Display a loading message in the result div
+              resultDiv.innerHTML = '<p>Searching...</p>'; // Use innerHTML to allow for basic HTML like <p>
+              resultDiv.style.display = 'block'; // Ensure the results area is visible
+    
+              try {
+                // *** THIS IS THE NEW CODE TO SEND THE QUERY TO YOUR BACKEND ***
+                const response = await fetch('/api/search', { // Replace '/api/search' if your backend endpoint is different
+                  method: 'POST', // Use POST to send data in the body
+                  headers: {
+                    'Content-Type': 'application/json', // Tell the backend we're sending JSON
+                  },
+                  body: JSON.stringify({ query: query }), // Convert the query object into a JSON string
+                });
+    
+                if (!response.ok) {
+                  // If the server responded with an error status (e.g., 404, 500)
+                  const errorText = await response.text(); // Try to get error message from response
+                  throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorText}`);
+                }
+    
+                const data = await response.json(); // Assuming your backend sends back the result as JSON
+    
+                // Assuming your backend sends a JSON object like { answer: "..." }
+                if (data && data.answer) {
+                  // Display the actual result in the result div
+                  resultDiv.innerHTML = `<strong>Answer:</strong><br>${data.answer}`; // You can format this nicely
+                  resultDiv.classList.add('search-result'); // Re-add class if needed for styling
+                } else {
+                  resultDiv.textContent = 'Received an unexpected response from the server.';
+                }
+    
+              } catch (error) {
+                // *** THIS HANDLES ERRORS DURING THE FETCH REQUEST ***
+                console.error('Error during search:', error);
+                resultDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`; // Display error in red
+                resultDiv.style.display = 'block'; // Ensure error is visible
+              }
+    
+            } else {
+              // Handle case where query is empty
+              resultDiv.textContent = 'Please enter a search query.';
+              resultDiv.style.display = 'block';
+            }
+          };
+    
+          // Event listeners for search (these stay the same)
+          searchButton.addEventListener('click', handleSearch);
+    
+          searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+              handleSearch();
+            }
+          });
+    
+          // Dynamic grid pattern based on mouse movement (stays the same)
+          document.addEventListener('mousemove', (e) => {
+            const mouseX = e.clientX / window.innerWidth;
+            const mouseY = e.clientY / window.innerHeight;
+    
+            const glowCircle = document.querySelector('.glow-circle');
+            glowCircle.style.transform = `translate(calc(-50% + ${mouseX * 20}px), calc(-50% + ${mouseY * 20}px))`;
+          });
+    
+          // Initial theme application (stays the same)
+          // This part is already handled by the savedTheme check at the top, but good to be aware of.
+        });
+    
+        // Theme toggle code outside DOMContentLoaded - this is already there
+        // const themeToggle = document.getElementById('theme-toggle');
+        // const body = document.body;
+        // const moonIcon = document.getElementById('moon-icon');
+        // const sunIcon = document.getElementById('sun-icon');
+        // const themeText = document.getElementById('theme-text');
+    
+        // const savedTheme = localStorage.getItem('theme');
+        // if (savedTheme === 'light') {
+        //     body.classList.add('light-mode');
+        //     moonIcon.style.display = 'none';
+        //     sunIcon.style.display = 'inline-block';
+        //     themeText.textContent = 'Dark Mode';
+        // }
+    
+        // themeToggle.addEventListener('click', () => {
+        //     if (body.classList.contains('light-mode')) {
+        //         body.classList.remove('light-mode');
+        //         localStorage.setItem('theme', 'dark');
+        //         moonIcon.style.display = 'inline-block';
+        //         sunIcon.style.display = 'none';
+        //         themeText.textContent = 'Light Mode';
+        //     } else {
+        //         body.classList.add('light-mode');
+        //         localStorage.setItem('theme', 'light');
+        //         moonIcon.style.display = 'none';
+        //         sunIcon.style.display = 'inline-block';
+        //         themeText.textContent = 'Dark Mode';
+        //     }
+        // });
+    
+    
+     </script>
 </body>
 </html>
